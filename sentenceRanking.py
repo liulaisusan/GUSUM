@@ -38,10 +38,8 @@ def textSentenceCount(Text):
 
 def longestSentenceLenght(Text):
     text=sent_tokenize(Text)
-    temp=0
-    for i in range(len(text)):
-        if temp<textWordCount(text[i]):
-            temp=textWordCount(text[i])
+    lens = [textWordCount(x) for x in text]
+    temp=max(lens)
     return temp
 
 def sentencePosition(sentence,location,corpus): 
@@ -56,6 +54,7 @@ def sentencePosition(sentence,location,corpus):
     
 def sentenceLength(sentence,corpus):
     return textWordCount(sentence)/longestSentenceLenght(corpus)
+
 
 def properNoun(sentence,corpus):
     text = nltk.word_tokenize(sentence)

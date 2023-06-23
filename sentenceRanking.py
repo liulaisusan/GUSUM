@@ -12,8 +12,8 @@ from nltk import sent_tokenize, word_tokenize,PorterStemmer
 
 def allCorpusSentenceRanking(tokenizedCorpus,corpus):
     sentenceRankList=[]
-    for i in range(len(tokenizedCorpus)):
-        value=sentenceRanking(tokenizedCorpus[i],i,corpus)
+    for i, sentence in enumerate(tokenizedCorpus):
+        value=sentenceRanking(sentence,i,corpus)
         value=round(value,5)
         sentenceRankList.append(value)
     return sentenceRankList
@@ -39,8 +39,7 @@ def textSentenceCount(Text):
 def longestSentenceLenght(Text):
     text=sent_tokenize(Text)
     lens = [textWordCount(x) for x in text]
-    temp=max(lens)
-    return temp
+    return max(lens)
 
 def sentencePosition(sentence,location,corpus): 
     N=textSentenceCount(corpus)
@@ -59,21 +58,11 @@ def sentenceLength(sentence,corpus):
 def properNoun(sentence,corpus):
     text = nltk.word_tokenize(sentence)
     tagged=nltk.pos_tag(text)
-    noProperNoun=0
-    #print(tagged)
-    for word in tagged:
-        if word[1]=='NNP':
-            noProperNoun=noProperNoun+1
-    #print(noProperNoun)
+    noProperNoun= tagged.count('NNP')
     return noProperNoun/len(text)
 
 def numericalToken(sentence,corpus):
     text = nltk.word_tokenize(sentence)
     tagged=nltk.pos_tag(text)
-    noNumericalToken=0
-    #print(tagged)
-    for word in tagged:
-        if word[1]=='CD':
-            noNumericalToken=noNumericalToken+1
-  #print(noProperNoun)
+    noNumericalToken= tagged.count('CD')
     return 1-(noNumericalToken/len(text))

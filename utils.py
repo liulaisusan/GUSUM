@@ -11,6 +11,7 @@ from tqdm import tqdm
 from sentenceRanking import allCorpusSentenceRanking, textSentenceCount
 from graph import createGraph,findHighestSimilarityRank
 from Evaluation import rougeEvaluation
+from sentenceRanker import SentenceRanker
 
 def load_dataset_from_huggingface(dataset_name, dataset_version):
     dataset = load_dataset(dataset_name, dataset_version)
@@ -71,7 +72,10 @@ def mainCreateSummaries(corpus):
     # sentences= sent_tokenize(corpus)
     sentences= seperateSentences(corpus)
     
-    initialRank=allCorpusSentenceRanking(sentences,corpus)
+    ranker = SentenceRanker()
+    featurelist = ['sentencePosition', 'sentenceLength', 'properNoun', 'numericalToken']
+    initialRank = ranker.rank(sentences, corpus, featurelist)
+    # initialRank=allCorpusSentenceRanking(sentences,corpus)
 
     similarityMatrix=createGraph(sentences) # create matrix ( Graph) shows similarities of sentences
 

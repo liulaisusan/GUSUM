@@ -9,10 +9,12 @@ Full Paper: https://aclanthology.org/2022.textgraphs-1.5
 You need to install python3 and following libraries
 
 ```
-pip install sentence-transformers==2.0.0
-pip install nltk==3.5
+pip install sentence-transformers
+pip install nltk
 pip install numpy
-pip install py-rouge==1.1
+pip install py-rouge
+pip install transformers
+pip install datasets
 
 ```
 

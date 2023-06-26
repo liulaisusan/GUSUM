@@ -1,11 +1,11 @@
-from nltk import sent_tokenize
 import nltk
-from nltk.corpus import stopwords
 import time
 from datasets import load_dataset
-from tqdm import tqdm
+import torch
+import os
+import pickle
 
-from utils import load_dataset_from_huggingface, cleanDocument, saveFile, createSummary, mainCreateSummaries, processCorpus
+from utils import saveEvaluator
 from Evaluation import rougeEvaluation
 from sentenceRanking import allCorpusSentenceRanking, textSentenceCount
 from summarizer import GusumSummarizer, HybridSummarizer, ModelSummarizer
@@ -22,6 +22,9 @@ if __name__ == "__main__":
     nltk.download('stopwords')
     nltk.download('averaged_perceptron_tagger')
     dataset = load_dataset("knkarthick/dialogsum", split="train")
+    dataname = 'train'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    batch_size = 10
     # dataset = load_dataset("knkarthick/dialogsum", split="test")
 
 
@@ -32,19 +35,26 @@ if __name__ == "__main__":
     # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/bart-large-cnn")
 
     tokenizer = AutoTokenizer.from_pretrained("philschmid/bart-large-cnn-samsum")
-    model = AutoModelForSeq2SeqLM.from_pretrained("philschmid/bart-large-cnn-samsum")
+    model = AutoModelForSeq2SeqLM.from_pretrained("philschmid/bart-large-cnn-samsum").to(device)
     print("Model configurations: ", model.generation_config)
 
     ranker = SentenceRanker()
     featurelist = ['sentencePosition', 'sentenceLength', 'properNoun', 'numericalToken']
     gusumSummarizer = GusumSummarizer(name='gusum', processed= False, ranker=ranker, featureList=featurelist)
-    hybridSummarizer = HybridSummarizer(name ='hybrid', model = model, tokenizer = tokenizer, gusumSummarizer = gusumSummarizer)
-    modelSummarizer = ModelSummarizer(name ='model', processed = False, model = model, tokenizer = tokenizer)
+    hybridSummarizer = HybridSummarizer(name ='hybrid', device = device, model = model, tokenizer = tokenizer, gusumSummarizer = gusumSummarizer)
+    modelSummarizer = ModelSummarizer(name ='model', device = device, processed = False, model = model, tokenizer = tokenizer)
     # summarizerList = [gusumSummarizer, hybridSummarizer, modelSummarizer]
     summarizerList = [hybridSummarizer, modelSummarizer]
-
-    evaluator = Evaluator(summarizerList)
-    evaluator.evaluate(dataset, 5, print_results=True)
+    if os.path.exists('./evaluator') and len(os.listdir('./evaluator')) != 0:
+        fileName= os.listdir('./evaluator')[0]
+        start = int(fileName.split('_')[1].split('.')[0])
+        print(f"Loading evaluator from {fileName}, starting from {start}")
+        with open(os.path.join('./evaluator', fileName), 'rb') as f:
+            evaluator = pickle.load(f)
+            evaluator.evaluate(dataset, dataname, 5, print_results=True, start=start)
+    else:
+        evaluator = Evaluator(summarizerList, saveEvaulator=True, path = './evaluator', interval=2)
+        evaluator.evaluate(dataset, dataname, 1, print_results=True, start = 1039)
 
 
     # startTimeforOverall = time.time()

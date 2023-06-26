@@ -1,23 +1,31 @@
 import rouge
 from tqdm import tqdm
 
+from utils import saveEvaluator
+
 class Evaluator:
-    def __init__(self, summarizers):
+    def __init__(self, summarizers, saveEvaulator = False, path = None, interval = 1000):
         self.summarizers = summarizers
         self.all_corpus = []
         self.all_goldensum = []
         self.all_gusum = []
         self.all_hybridsum = []
         self.all_modelsum = []
+
+        self.saveEvaulator = saveEvaulator
+        self.path = path
+        self.interval = interval
     
-    def evaluate(self, dataset, num_of_documents = None, aggregators=['Avg'], print_results = True):
+    def evaluate(self, dataset, dataname, num_of_documents = None, aggregators=['Avg'], print_results = True, start = 0):
         if num_of_documents:
             N = num_of_documents
         else:
             N = len(dataset)
-        for d in tqdm(range(N)):
-            if d % 1000 == 0:
+        for d in tqdm(range(start,N+start)):
+            if d % self.interval == 0 and d != start:
                 self._allRougeEvaluation(aggregators)
+                if self.saveEvaulator:
+                    saveEvaluator(self, d, self.path, dataname, self.interval)
             corpus=dataset['dialogue'][d]
             self.all_corpus.append(corpus)
             golden_summary=dataset['summary'][d]
@@ -43,6 +51,8 @@ class Evaluator:
         if print_results:
             self.printAllSummaries()
         self._allRougeEvaluation(aggregators)
+        if self.saveEvaulator:
+            saveEvaluator(self, 'all', self.path, dataname, self.interval)
 
     def printSingleSummary(self, d, corpus = None, golden_sum = None, gusum_sum = None, hybrid_sum = None, model_sum = None):
         print("="*100)

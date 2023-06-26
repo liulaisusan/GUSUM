@@ -29,26 +29,11 @@ def createGraph(sentences):
     # bert-base-nli-stsb-mean-tokens
     model = SentenceTransformer('roberta-base-nli-stsb-mean-tokens') #The sentence transform models mentioned above can be used.
     sentence_embeddings = model.encode(sentences, convert_to_numpy=True)
-    # sentenceGraph =np.zeros((len(sentences), len(sentences)))
-    # temp = np.arange(len(sentences))
-    # for x in range(len(sentences)):
-    #     newTemp= np.delete(temp, x)
-    #     for y in newTemp:
-    #         similarity= cosine(sentence_embeddings[x],sentence_embeddings[y]) # You can change the vector similarity measurement method used when creating graphs. Cosine, euclidean, manhattan and minkowski methods are defined.
-    #         sentenceGraph[x][y]=similarity
     sentenceGraph = 1-cdist(sentence_embeddings, sentence_embeddings, metric='cosine')
     np.fill_diagonal(sentenceGraph, 0)
     return sentenceGraph
 
 
 def findHighestSimilarityRank(similarityMatrix, initialRank):
-    # newRank=[0] * len(similarityMatrix)
-    # temp=0
-    # for i in range(len(similarityMatrix)):
-    #     for j in range(len(similarityMatrix)):
-    #         temp=temp+similarityMatrix[i][j] # sum of total similarity of sentences
-    #     newRank[i]=temp*initialRank[i]
-    #     temp=0
     newRank = initialRank * np.sum(similarityMatrix, axis=1)
-
     return newRank

@@ -79,8 +79,9 @@ class GusumSummarizer(Summarizer):
         return summary 
     
 class HybridSummarizer(Summarizer):
-    def __init__(self, name, model, tokenizer, gusumSummarizer = None):
+    def __init__(self, name, device, model, tokenizer, gusumSummarizer = None):
         super().__init__(name)
+        self.device = device
         self.model = model
         self.tokenizer = tokenizer
         self.gusumSummarizer = gusumSummarizer
@@ -91,14 +92,15 @@ class HybridSummarizer(Summarizer):
         if not gusumSummary:
             # print(" Gusum Summary is not provides, creating one.")
             gusumSummary = self.gusumSummarizer.summarize(corpus, sentences)
-        inputs = self.tokenizer(gusumSummary, return_tensors="pt").input_ids  # Batch size 1
+        inputs = self.tokenizer(gusumSummary, return_tensors="pt", truncation = True).to(self.device).input_ids  # Batch size 1
         outputs = self.model.generate(inputs, max_new_tokens=100)
         summary = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return summary
     
 class ModelSummarizer(Summarizer):
-    def __init__(self, name, processed, model, tokenizer):
+    def __init__(self, name, device, processed, model, tokenizer):
         super().__init__(name)
+        self.device = device
         self.processed = processed
         self.model = model
         self.tokenizer = tokenizer
@@ -106,7 +108,7 @@ class ModelSummarizer(Summarizer):
     def summarize(self, corpus):
         if not self.processed:
             corpus = self.processCorpus(corpus)
-        inputs = self.tokenizer(corpus, return_tensors="pt").input_ids  # Batch size 1
+        inputs = self.tokenizer(corpus, return_tensors="pt", truncation = True).to(self.device).input_ids  # Batch size 1
         outputs = self.model.generate(inputs, max_new_tokens=100)
         summary = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return summary

@@ -1,5 +1,7 @@
 import rouge
 from tqdm import tqdm
+import gc
+import torch
 
 from utils import saveEvaluator
 
@@ -16,12 +18,10 @@ class Evaluator:
         self.path = path
         self.interval = interval
     
-    def evaluate(self, dataset, dataname, num_of_documents = None, aggregators=['Avg'], print_results = True, start = 0):
-        if num_of_documents:
-            N = num_of_documents
-        else:
-            N = len(dataset)
-        for d in tqdm(range(start,N+start)):
+    def evaluate(self, dataset, dataname, start = 0, end = None, aggregators=['Avg'], print_results = True):
+        if not end:
+            end = len(dataset)
+        for d in tqdm(range(start, end)):
             if d % self.interval == 0 and d != start:
                 self._allRougeEvaluation(aggregators)
                 if self.saveEvaulator:
@@ -46,6 +46,46 @@ class Evaluator:
                 elif summarizer.name == 'model':
                     model_sum = summarizer.summarize(corpus)
                     self.all_modelsum.append(model_sum)
+            # if print_results:
+            #     self.printSingleSummary(d, corpus, golden_summary, gusum_sum, hybrid_sum, model_sum)
+        if print_results:
+            self.printAllSummaries()
+        self._allRougeEvaluation(aggregators)
+        if self.saveEvaulator:
+            saveEvaluator(self, 'all', self.path, dataname, self.interval)
+    
+    def batch_evaluate(self, dataset, dataname, start = 0, end = None, aggregators=['Avg'], print_results = True, batch_size = 10):
+        if not end:
+            end = len(dataset)
+        for d in tqdm(range(start,end, batch_size)):
+            if len(self.all_corpus) % self.interval == 0 and d != start:
+                self._allRougeEvaluation(aggregators)
+                if self.saveEvaulator:
+                    saveEvaluator(self, len(self.all_corpus), self.path, dataname, self.interval)
+            corpus=dataset['dialogue'][d : d + batch_size]
+            self.all_corpus.extend(corpus)
+            golden_summary=dataset['summary'][d : d + batch_size]
+            self.all_goldensum.extend(golden_summary)
+            gusum_sum = None
+            hybrid_sum = None
+            model_sum = None
+            for summarizer in self.summarizers:
+                if summarizer.name == 'gusum':
+                    gusum_sum = summarizer.batch_summarize(corpus)
+                    self.all_gusum.extend(gusum_sum)
+                elif summarizer.name == 'hybrid':
+                    if gusum_sum:
+                        hybrid_sum = summarizer.batch_summarize(corpus, gusum_sum)
+                    else:
+                        hybrid_sum = summarizer.batch_summarize(corpus)
+                    self.all_hybridsum.extend(hybrid_sum)
+                    del hybrid_sum
+                elif summarizer.name == 'model':
+                    model_sum = summarizer.batch_summarize(corpus)
+                    self.all_modelsum.extend(model_sum)
+                    del model_sum
+            gc.collect()
+            # torch.cuda.empty_cache()
             # if print_results:
             #     self.printSingleSummary(d, corpus, golden_summary, gusum_sum, hybrid_sum, model_sum)
         if print_results:

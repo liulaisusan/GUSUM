@@ -9,9 +9,7 @@ import time
 from tqdm import tqdm
 import pickle
 
-from sentenceRanking import allCorpusSentenceRanking, textSentenceCount
 from graph import createGraph,findHighestSimilarityRank
-from Evaluation import rougeEvaluation
 from sentenceRanker import SentenceRanker
 
 def saveEvaluator(evalutor, d, path, dataname, interval):

@@ -1,8 +1,7 @@
-# GUSUM
+# Hybrid Gusum
 
-This is an implementation of the  GUSUM ( as shorthand for Graph-Based Unsupervised Summarization) which a simple, yet effective approach to improving the state of the art in graph-based unsupervised extractive text summarization. 
-
-Full Paper: https://aclanthology.org/2022.textgraphs-1.5
+This is an implementation of the [GUSUM](https://aclanthology.org/2022.textgraphs-1.5
+) ( as shorthand for Graph-Based Unsupervised Summarization) combination with a model-based summarizatiob.
 
 ## Installation
 
@@ -17,18 +16,13 @@ pip install transformers
 pip install datasets
 
 ```
+## Results of Evaluation 
+The evaluation is done by this [notebook](https://colab.research.google.com/drive/1w2uCvvzJSvck_fuMaoyPnEOBqxnN78ID?usp=drive_link) with GPU T4.   
+For train data, it took 10 hours and for test data around 1.5 hours.
 
 ## Data used in the paper
 
-For The CNN / DailyMail Dataset:  https://huggingface.co/datasets/cnn_dailymail
-
-```
-from datasets import load_dataset
-dataset = load_dataset('cnn_dailymail', '3.0.0')
-
-```
-
-For The New York Times Annotated Corpus: https://catalog.ldc.upenn.edu/LDC2008T19 
+DialogSum, you can download it from : https://huggingface.co/datasets/knkarthick/dialogsum
 
 ## Files Structure
 
@@ -37,26 +31,16 @@ The files are organized as follows:
 ```
 .
 ├── README.md
-└── main.py
-└── sentenceRanking.py
-└── graph.py
-└── data
-    └── CnnDailyDataset
-        ├── Documents
-            ├── News1.txt
-            ├── News2.txt
-            ├── ....
-            └── News11490.txt
-        ├── Highlights
-            ├── Highlight.A.1.txt
-            ├── Highlight.A.2.txt
-            ├── ....
-            └── Highlight.A.11490.txt
-        └── MySummaries
-            ├── MySummary.1.txt
-            ├── MySummary.2.txt
-            ├── ....
-            └── MySummary.11490.txt
+├── environment.yml
+├── evaluator
+│   ├── evaluator_test_all.pkl
+│   └── evaluator_train_all.pkl
+├── evaluator.py
+├── graph.py
+├── main_dialogsum.py
+├── sentenceRanker.py
+├── summarizer.py
+└── utils.py
 
 ```
 ## Evaluation

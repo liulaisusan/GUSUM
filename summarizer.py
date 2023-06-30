@@ -57,6 +57,12 @@ class GusumSummarizer(Summarizer):
 
         summary=self._createSummary(sentences, newRank, sentenceNumberInSummary)
         return summary
+    
+    def batch_summarize(self, batch_corpus, sentences = None):
+        summaries = []
+        for corpus in batch_corpus:
+            summaries.append(self.summarize(corpus, sentences))
+        return summaries
 
     def _createSummary(self, sentences, sentencesRank, sentenceAmount):
         temp=sorted(sentencesRank)
@@ -97,6 +103,17 @@ class HybridSummarizer(Summarizer):
         summary = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return summary
     
+    def batch_summarize(self, batch_corpus, gusumSummaries = None, sentences = None):
+        if not self.gusumSummarizer and not gusumSummaries:
+            raise Exception("Neither Gusum Summarizer or Summary is not provided")
+        if not gusumSummaries:
+            # print(" Gusum Summary is not provides, creating one.")
+            gusumSummaries = self.gusumSummarizer.batch_summarize(batch_corpus, sentences)
+        inputs =self.tokenizer(gusumSummaries, return_tensors="pt", truncation = True, padding=True).to(self.device).input_ids
+        outputs = self.model.generate(inputs, max_new_tokens=100)
+        summaries = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return summaries
+    
 class ModelSummarizer(Summarizer):
     def __init__(self, name, device, processed, model, tokenizer):
         super().__init__(name)
@@ -112,6 +129,14 @@ class ModelSummarizer(Summarizer):
         outputs = self.model.generate(inputs, max_new_tokens=100)
         summary = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return summary
+    
+    def batch_summarize(self, batch_corpus):
+        if not self.processed:
+            batch_corpus = [self.processCorpus(corpus) for corpus in batch_corpus]
+        inputs =self.tokenizer(batch_corpus, return_tensors="pt", truncation = True, padding=True).to(self.device).input_ids
+        outputs = self.model.generate(inputs, max_new_tokens=100)
+        summaries = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return summaries
     
     def processCorpus(self, corpus):
         corpus = self.cleanDocument(corpus) # Clean Paranthesis

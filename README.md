@@ -20,6 +20,25 @@ Otherwise install in a Conda environment with following command:
 ```bash
 conda env create -f environment.yml
 ```
+
+## Run the code
+Execute under root folder with following command:
+```bash
+python main_dialogsum.py 
+```
+### Some configs can be changed
+In [main_dialogsum.py](./main_dialogsum.py) line 19-27
+```python
+dataname = 'train' # ['train', 'test', 'dev']
+dataset = load_dataset("knkarthick/dialogsum", split=dataname)
+device = 'cuda' if torch.cuda.is_available() else 'cpu' # 'cuda' or 'cpu'
+batch_size = 2 # batch size 
+interval = 2 # save evaluator every this many iterations, should not be smaller than batch_size
+start = 0 # start index of the dataset
+end = 10 # end index of the dataset
+path = "./evaluator" # path to save evaluator
+print_results = True # print the evaluation results
+```
 ## Results of Evaluation 
 The evaluation is done by this [notebook](https://colab.research.google.com/drive/1w2uCvvzJSvck_fuMaoyPnEOBqxnN78ID?usp=drive_link) with GPU T4.   
 For training data, it took 10 hours and for test data around 1.5 hours.

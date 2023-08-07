@@ -67,25 +67,7 @@ The files are organized as follows:
 └── utils.py
 
 ```
-## Evaluation
-
-Automated evaluation used the py-rouge package. https://pypi.org/project/py-rouge/ Our evaluation metrics are set as shown below.
-
-```
-evaluator = rouge.Rouge(metrics=['rouge-n', 'rouge-l', 'rouge-w'],
-                           max_n=4,
-                           limit_length=False,
-                           length_limit=1000,
-                           length_limit_type='words',
-                           apply_avg=apply_avg,
-                           apply_best=apply_best,
-                           alpha=0.2, 
-                           weight_factor=1.2,
-                           stemming=True)
-                           
- ```
-
-## Citation
+## Citation for GUSUM
 ```
 @InProceedings{gokhan-smith-lee:2022:textgraphs,
   author    = {Gokhan, Tuba  and  Smith, Phillip  and  Lee, Mark},

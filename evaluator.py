@@ -6,6 +6,10 @@ import torch
 from utils import saveEvaluator
 
 class Evaluator:
+    '''
+    Evaluates the summarizers using ROUGE metrics
+    Not influnce the summarization process, but for evaluation only
+    '''
     def __init__(self, summarizers, saveEvaulator = False, path = None, interval = 1000):
         self.summarizers = summarizers
         self.all_corpus = []

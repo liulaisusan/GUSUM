@@ -4,6 +4,13 @@ from nltk import sent_tokenize
 from graph import createGraph,findHighestSimilarityRank
 
 class Summarizer:
+    '''
+    Abstract class for summarizers
+    GUSUM, Hybrid
+    Both of them have summarize and batch_summarize methods
+    summarize: Summarize a single document
+    batch_summarize: Summarize a batch of documents
+    '''
     def __init__(self, name) -> None:
         self.name = name
 

@@ -16,22 +16,15 @@ if __name__ == "__main__":
     nltk.download('punkt')
     nltk.download('stopwords')
     nltk.download('averaged_perceptron_tagger')
-    dataname = 'train'
+    dataname = 'train' # ['train', 'test', 'dev']
     dataset = load_dataset("knkarthick/dialogsum", split=dataname)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    batch_size = 2
-    interval = 2 # save evaluator every this many iterations, should be larger than batch_size
-    start = 0
-    end = 10
-    path = "./evaluator"
+    device = 'cuda' if torch.cuda.is_available() else 'cpu' # 'cuda' or 'cpu'
+    batch_size = 2 # batch size 
+    interval = 2 # save evaluator every this many iterations, should not be smaller than batch_size
+    start = 0 # start index of the dataset
+    end = 10 # end index of the dataset
+    path = "./evaluator" # path to save evaluator
     print_results = True
-
-
-    # tokenizer = AutoTokenizer.from_pretrained("gauravkoradiya/T5-Finetuned-Summarization-DialogueDataset")
-    # model = AutoModelForSeq2SeqLM.from_pretrained("gauravkoradiya/T5-Finetuned-Summarization-DialogueDataset")
-
-    # tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
-    # model = AutoModelForSeq2SeqLM.from_pretrained("facebook/bart-large-cnn")
 
     tokenizer = AutoTokenizer.from_pretrained("philschmid/bart-large-cnn-samsum")
     model = AutoModelForSeq2SeqLM.from_pretrained("philschmid/bart-large-cnn-samsum").to(device)
@@ -43,10 +36,11 @@ if __name__ == "__main__":
     gusumSummarizer = GusumSummarizer(name='gusum', processed= False, ranker=ranker, featureList=featurelist)
     hybridSummarizer = HybridSummarizer(name ='hybrid', device = device, model = model, tokenizer = tokenizer, gusumSummarizer = gusumSummarizer)
     modelSummarizer = ModelSummarizer(name ='model', device = device, processed = False, model = model, tokenizer = tokenizer)
-    summarizerList = [gusumSummarizer, hybridSummarizer, modelSummarizer]
-    # summarizerList = [hybridSummarizer, modelSummarizer]
+    summarizerList = [gusumSummarizer, hybridSummarizer]
+    # summarizerList = [hybridSummarizer]
 
     saved_evaluator = False
+    # check if exists saved evaluator, if so will continue from there
     if os.path.exists(path) and len(os.listdir(path)) != 0:
         for fileName in os.listdir(path):
             datatype = fileName.split('_')[1] # train, test, val

@@ -16,9 +16,14 @@ pip install transformers
 pip install datasets
 
 ```
+Otherwise install in a Conda environment with following command:
+```bash
+conda env create -f environment.yml
+```
 ## Results of Evaluation 
 The evaluation is done by this [notebook](https://colab.research.google.com/drive/1w2uCvvzJSvck_fuMaoyPnEOBqxnN78ID?usp=drive_link) with GPU T4.   
-For train data, it took 10 hours and for test data around 1.5 hours.
+For training data, it took 10 hours and for test data around 1.5 hours.
+The final result in work is a combination of both training and test data.
 
 ## Data used in the paper
 
